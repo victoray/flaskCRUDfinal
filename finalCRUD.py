@@ -20,40 +20,49 @@ def close(session):
 
 @app.route('/')
 def home():
-    return "hello"
+    session = start()
+    restaurants = session.query(Restaurant).all()
+    close(session)
+    return render_template("index.html", restaurants=restaurants)
 
 
-@app.route('/new', methods=['GET', ['POST']])
+@app.route('/new', methods=['GET', 'POST'])
 def newrestaurant():
     return "new Restaurant"
 
 
-@app.route('/<int:restaurant_id>/edit', methods=['GET', ['POST']])
+@app.route('/<int:restaurant_id>/edit', methods=['GET', 'POST'])
 def editrestaurant(restaurant_id):
     return "edit Restaurant"
 
 
-@app.route('/<int:restaurant_id>/delete', methods=['GET', ['POST']])
+@app.route('/<int:restaurant_id>/delete', methods=['GET', 'POST'])
 def deleterestaurant(restaurant_id):
     return "delete Restaurant"
 
 
 @app.route('/<int:restaurant_id>/')
 def menu(restaurant_id):
-    return "Menu"
+    session = start()
+    restaurant = session.query(Restaurant).filter(Restaurant.id == restaurant_id).one()
+    menu = session.query(MenuItem).filter(MenuItem.restaurant_id == restaurant_id)
+    for item in menu:
+        print(item.course)
+    close(session)
+    return render_template('menu.html', restaurant=restaurant, menu=menu)
 
 
-@app.route('/<int:restaurant_id>/new', methods=['GET', ['POST']])
+@app.route('/<int:restaurant_id>/new', methods=['GET', 'POST'])
 def newmenu(restaurant_id):
     return "new Menu"
 
 
-@app.route('/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', ['POST']])
+@app.route('/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
 def editmenu(restaurant_id, menu_id):
     return "edit Menu"
 
 
-@app.route('/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', ['POST']])
+@app.route('/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
 def deletemenu(restaurant_id, menu_id):
     return "delete Menu"
 
