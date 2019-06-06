@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from db_setup import Base, Restaurant, MenuItem
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///restaurantmenu.db')
@@ -132,6 +132,20 @@ def deletemenu(restaurant_id, menu_id):
     close(session)
     return render_template('deletemenu.html', restaurant_id=restaurant_id, menuitem=menuitem)
 
+@app.route('/<int:restaurant_id>/menu/JSON')
+def restaurantMenuJSON(restaurant_id):
+    session = start()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant_id).all()
+    close(session)
+    return jsonify(MenuItems=[i.serialize for i in items])
+
+
+@app.route('/<int:restaurant_id>/menu/<int:menu_id>/JSON')
+def menuJSON(restaurant_id, menu_id):
+    session = start()
+    menuitem = session.query(MenuItem).filter(MenuItem.id == menu_id).one()
+    close(session)
+    return jsonify(Menu=menuitem.serialize)
 
 if __name__ == '__main__':
     app.debug = True
