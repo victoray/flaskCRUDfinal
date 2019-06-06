@@ -1,1 +1,1 @@
-web: unicorn finalCRUD:app
+web: gunicorn finalCRUD:app
