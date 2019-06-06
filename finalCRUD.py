@@ -1,3 +1,5 @@
+import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -88,7 +90,6 @@ def newmenu(restaurant_id):
         menuitem = MenuItem(name=str(request.form['name']).title(), price=request.form['price'],
                             description=request.form['description'], course=request.form['course'],
                             restaurant_id=restaurant_id)
-        print(menuitem.name)
         session.add(menuitem)
         session.commit()
         close(session)
@@ -148,5 +149,6 @@ def menuJSON(restaurant_id, menu_id):
     return jsonify(Menu=menuitem.serialize)
 
 if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 9000))
     app.debug = True
-    app.run(host="localhost", port=9000)
+    app.run(host="localhost", port=port)
