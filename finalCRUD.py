@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 
 from db_setup import Base, Restaurant, MenuItem
 from flask import Flask, request, render_template, redirect, url_for, jsonify
+from waitress import serve
 
 app = Flask(__name__)
 engine = create_engine('sqlite:///restaurantmenu.db')
@@ -149,7 +150,9 @@ def menuJSON(restaurant_id, menu_id):
     return jsonify(Menu=menuitem.serialize)
 
 if __name__ == '__main__':
+    app.secret_key = os.urandom(16)
+    print(app.secret_key)
     port = int(os.environ.get('PORT', 8000))
     print(port)
     app.debug = True
-    app.run(host="localhost", port=port)
+    serve(app, port=port)
