@@ -149,6 +149,7 @@ def menuJSON(restaurant_id, menu_id):
     return jsonify(Menu=menuitem.serialize)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 9000))
+    port = int(os.environ.get('PORT', 8000))
+    print(port)
     app.debug = True
     app.run(host="localhost", port=port)
