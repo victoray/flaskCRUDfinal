@@ -33,13 +33,12 @@
                             </div>
                             <div class="col-md-6 col-lg-6 col-sm-6 col-xs-12">
                                 <dt style="color: #0b0b0b"><i>Description: </i></dt>
-                                <textarea type="text" rows="5" cols="45" name="description" id="description"
+                                <textarea type="text" rows="5" cols="30" name="description" id="description"
                                           placeholder="{{menuitem.description}}"></textarea>
                             </div>
                             <div class="col-md-6 col-lg-6 col-sm-6 col-sm-offset-3  col-md-offset-3  col-lg-offset-3 col-xs-12">
                                 <button type="submit">Update</button>
-                                <h3><a class="button" href="{{url_for('menu', restaurant_id=restaurant.id)}}">Cancel</a>
-                                </h3>
+                                <a href="{{url_for('menu', restaurant_id=restaurant.id)}}"><button type="submit">Cancel</button></a>
                             </div>
 
                         </div>

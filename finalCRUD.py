@@ -18,7 +18,7 @@ def start():
 def close(session):
     session.close()
 
-
+#Home Page
 @app.route('/')
 def home():
     session = start()
@@ -26,7 +26,7 @@ def home():
     close(session)
     return render_template("index.html", restaurants=restaurants)
 
-
+#New Restaurant
 @app.route('/new', methods=['GET', 'POST'])
 def newrestaurant():
     session = start()
@@ -40,7 +40,7 @@ def newrestaurant():
     close(session)
     return redirect("/#new-restaurant")
 
-
+#Edit Restaurant
 @app.route('/<int:restaurant_id>/edit', methods=['GET', 'POST'])
 def editrestaurant(restaurant_id):
     session = start()
@@ -54,7 +54,7 @@ def editrestaurant(restaurant_id):
     close(session)
     return render_template('editrestaurant.html', restaurant=restaurant)
 
-
+#Delete Restaurant
 @app.route('/<int:restaurant_id>/delete', methods=['GET', 'POST'])
 def deleterestaurant(restaurant_id):
     session = start()
@@ -69,7 +69,7 @@ def deleterestaurant(restaurant_id):
     close(session)
     return render_template('deleterestaurant.html', restaurant=restaurant)
 
-
+# Menu View
 @app.route('/<int:restaurant_id>/')
 def menu(restaurant_id):
     session = start()
@@ -79,12 +79,25 @@ def menu(restaurant_id):
     close(session)
     return render_template('menu.html', restaurant=restaurant, menu=menu)
 
-
+#New Menu Item
 @app.route('/<int:restaurant_id>/new', methods=['GET', 'POST'])
 def newmenu(restaurant_id):
-    return "new Menu"
+    session = start()
 
+    if request.method == 'POST':
+        menuitem = MenuItem(name=str(request.form['name']).title(), price=request.form['price'],
+                            description=request.form['description'], course=request.form['course'],
+                            restaurant_id=restaurant_id)
+        print(menuitem.name)
+        session.add(menuitem)
+        session.commit()
+        close(session)
+        return redirect(url_for('menu', restaurant_id=restaurant_id))
 
+    close(session)
+    return render_template('newmenu.html', restaurant_id=restaurant_id)
+
+#Edit menu
 @app.route('/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
 def editmenu(restaurant_id, menu_id):
     session = start()
@@ -104,7 +117,7 @@ def editmenu(restaurant_id, menu_id):
     close(session)
     return render_template('editmenu.html', restaurant=restaurant, menuitem=menuitem)
 
-
+#delete User
 @app.route('/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
 def deletemenu(restaurant_id, menu_id):
     session = start()
