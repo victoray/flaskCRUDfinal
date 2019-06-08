@@ -1,5 +1,3 @@
-import os
-import sys
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -10,10 +8,10 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'user'
 
-    name = Column(String(80), nullable=False)
     id = Column(Integer, primary_key=True)
-    email = Column(String(250))
-    picture = Column(String(8))
+    name = Column(String(250), nullable=False)
+    email = Column(String(250), nullable=False)
+    picture = Column(String(250))
 
 
 class Restaurant(Base):
@@ -23,6 +21,14 @@ class Restaurant(Base):
     name = Column(String(250), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'))
     user = relationship(User)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'name': self.name,
+            'id': self.id,
+        }
 
 
 class MenuItem(Base):
@@ -51,6 +57,6 @@ class MenuItem(Base):
 
 
 
-engine = create_engine('sqlite:///restaurantmenu.db')
+engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 
 Base.metadata.create_all(engine)

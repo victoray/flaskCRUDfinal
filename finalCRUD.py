@@ -6,7 +6,7 @@ from oauth2client.client import flow_from_clientsecrets, FlowExchangeError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from db_setup import Base, Restaurant, MenuItem
+from db_setup import Base, Restaurant, MenuItem, User
 from flask import Flask, request, render_template, redirect, url_for, jsonify, session as login_session, make_response, \
     abort, flash
 from waitress import serve
@@ -15,7 +15,7 @@ import random, string, json
 
 
 app = Flask(__name__)
-engine = create_engine('sqlite:///restaurantmenu.db')
+engine = create_engine('sqlite:///restaurantmenuwithusers.db')
 Base.metadata.bind = engine
 CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
 
@@ -73,8 +73,7 @@ def gconnect():
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print
-        "Token's client ID does not match app's."
+        print("Token's client ID does not match app's.")
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -98,18 +97,16 @@ def gconnect():
     data = answer.json()
 
     login_session['username'] = data['name']
-    print(data)
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-    flash("you are now logged in as %s" % login_session['username'])
+    # check user
+    session = start()
+    user_id = getUserID(login_session['email'])
+    print(user_id)
+    if getUserID(login_session['email']) is None:
+        userid = createUser(login_session)
+
     response = make_response(json.dumps('Successfully Login.'), 200)
     response.headers['Content-Type'] = 'application/json'
     return response
@@ -152,11 +149,39 @@ def showLogin():
     print("TEST 0")
     return render_template('login.html', STATE=state)
 
+def createUser(login_session):
+    session = start()
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'], picture=login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    session.close()
+    return user.id
+
+
+def getUserInfo(user_id):
+    session = start()
+    user = session.query(User).filter_by(id=user_id).one()
+    close(session)
+    return user
+
+
+def getUserID(email):
+    session = start()
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        session.close()
+        return user.id
+    except:
+        return None
+
 #Home Page
 @app.route('/')
 def home():
     session = start()
-    restaurants = session.query(Restaurant).all()
+    userId = getUserID(login_session['email'])
+    restaurants = session.query(Restaurant).filter(Restaurant.user_id == userId).all()
     close(session)
     return render_template("index.html", restaurants=restaurants)
 
@@ -167,8 +192,10 @@ def newrestaurant():
         return redirect(url_for('showLogin'))
     session = start()
 
+    userid = getUserID(login_session['email'])
+
     if request.method == 'POST':
-        restaurant = Restaurant(name=request.form['name'])
+        restaurant = Restaurant(name=request.form['name'], user_id=userid)
         session.add(restaurant)
         session.commit()
         return redirect(url_for('home'))
