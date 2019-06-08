@@ -37,8 +37,6 @@ def gconnect():
         return response
     # Obtain authorization code
     code = request.data
-
-    print("TEST 1")
     try:
         # Upgrade the authorization code into a credentials object
         oauth_flow = flow_from_clientsecrets('client_secrets.json', scope='')
@@ -112,8 +110,9 @@ def gconnect():
     output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print(output)
-    return output
+    response = make_response(json.dumps('Successfully Login.'), 200)
+    response.headers['Content-Type'] = 'application/json'
+    return response
 
 @app.route('/gdisconnect')
 def gdisconnect():
